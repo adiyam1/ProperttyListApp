@@ -1,5 +1,5 @@
 class Property {
-  final int id;
+  final int? id;
   final String title;
   final String description;
   final String location;
@@ -10,7 +10,7 @@ class Property {
   final DateTime lastUpdated;
 
   Property({
-    required this.id,
+    this.id,
     required this.title,
     required this.description,
     required this.location,
