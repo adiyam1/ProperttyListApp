@@ -1,17 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'core/themes/app_theme.dart';
+import 'providers/auth_provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/app_init_provider.dart';
-import 'screens/property_list_screen.dart';
+import 'screens/auth_gate.dart';
 
-void main() {
-  // Ensure Flutter is ready for async calls
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  final prefs = await SharedPreferences.getInstance();
+
   runApp(
-    const ProviderScope(
-      child: MyApp(),
+    ProviderScope(
+      overrides: [
+        sharedPrefsProvider.overrideWithValue(prefs),
+      ],
+      child: const MyApp(),
     ),
   );
 }
@@ -21,23 +28,17 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 1. Watch the Theme (persisted in SQLite via ThemeNotifier)
     final isDarkMode = ref.watch(themeProvider);
-
-    // 2. Watch the Initialization state
     final appInit = ref.watch(appInitProvider);
 
     return MaterialApp(
-      title: 'Property Pal',
+      title: 'PropertyPal',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      // themeMode automatically switches based on the profile toggle
       themeMode: isDarkMode ? ThemeMode.dark : ThemeMode.light,
-
-      // Handle the initial state of the app
       home: appInit.when(
-        data: (_) => const PropertyListScreen(),
+        data: (_) => const AuthGate(),
         loading: () => const Scaffold(
           body: Center(child: CircularProgressIndicator()),
         ),

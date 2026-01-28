@@ -5,6 +5,9 @@ import '../models/inquiry.dart';
 import '../providers/favorites_provider.dart';
 import '../providers/inquiry_provider.dart';
 import '../providers/user_provider.dart';
+import '../providers/property_provider.dart';
+import '../widget/property_image.dart';
+import 'add_edit_property_screen.dart';
 
 class PropertyDetailScreen extends ConsumerStatefulWidget {
   final Property property;
@@ -24,16 +27,66 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
     super.dispose();
   }
 
+  void _deleteProperty() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete property?'),
+        content: const Text('This cannot be undone.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () async {
+              await ref.read(propertyRepositoryProvider).deleteProperty(widget.property.id!);
+              ref.invalidate(propertyListProvider);
+              ref.invalidate(favoritesProvider);
+              if (!context.mounted) return;
+              Navigator.pop(ctx);
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Property deleted')),
+              );
+            },
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final property = widget.property;
     final isFavorite = ref.watch(favoritesProvider.notifier).isFavorite(property.id);
-    final user = ref.watch(userProvider).value;
+    final user = ref.watch(userProvider).maybeWhen(
+          data: (d) => d,
+          orElse: () => null,
+        );
+    final isAdmin = user?.isAdmin ?? false;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Detail'),
         actions: [
+          if (isAdmin) ...[
+            IconButton(
+              icon: const Icon(Icons.edit_outlined),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => AddEditPropertyScreen(property: property),
+                ),
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete_outline, color: Colors.red),
+              onPressed: _deleteProperty,
+            ),
+          ],
           IconButton(
             icon: Icon(
               isFavorite ? Icons.favorite : Icons.favorite_border,
@@ -57,11 +110,17 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
                   height: 300,
                   width: double.infinity,
                   child: PageView.builder(
-                    itemCount: property.imageUrls.length,
-                    itemBuilder: (context, index) => Image.network(
-                      property.imageUrls[index],
-                      fit: BoxFit.cover,
-                    ),
+                    itemCount: property.imageUrls.isEmpty ? 1 : property.imageUrls.length,
+                    itemBuilder: (context, index) {
+                      final url = property.imageUrls.isEmpty
+                          ? 'https://via.placeholder.com/400'
+                          : property.imageUrls[index];
+                      return propertyImage(
+                        url: url,
+                        fit: BoxFit.cover,
+                        height: 300,
+                      );
+                    },
                   ),
                 ),
                 Positioned(
@@ -74,7 +133,7 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      '1/${property.imageUrls.length}',
+                      '${property.imageUrls.isEmpty ? 1 : 1}/${property.imageUrls.isEmpty ? 1 : property.imageUrls.length}',
                       style: const TextStyle(color: Colors.white),
                     ),
                   ),
@@ -190,11 +249,14 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
                           );
 
                           await ref.read(inquiryProvider.notifier).addInquiry(inquiry);
+                          ref.invalidate(myInquiriesProvider);
                           _messageController.clear();
 
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Message queued for sync!')),
-                          );
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Message queued for sync!')),
+                            );
+                          }
                         }
                       },
                       child: const Text('Send Message', style: TextStyle(color: Colors.white, fontSize: 16)),

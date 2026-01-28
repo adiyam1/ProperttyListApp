@@ -33,8 +33,10 @@ class _InquiryFormState extends ConsumerState<InquiryForm> {
 
     setState(() => _isSubmitting = true);
 
-    // Using the userProvider we created earlier
-    final user = ref.read(userProvider).value;
+    final user = ref.read(userProvider).maybeWhen(
+          data: (d) => d,
+          orElse: () => null,
+        );
 
     if (user == null) {
       setState(() => _isSubmitting = false);
@@ -52,8 +54,8 @@ class _InquiryFormState extends ConsumerState<InquiryForm> {
       timestamp: DateTime.now(),
     );
 
-    // Save via the notifier to trigger UI updates globally
     await ref.read(inquiryProvider.notifier).addInquiry(inquiry);
+    ref.invalidate(myInquiriesProvider);
 
     if (mounted) {
       setState(() => _isSubmitting = false);

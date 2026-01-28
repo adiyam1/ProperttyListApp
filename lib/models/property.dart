@@ -29,8 +29,8 @@ class Property {
     this.isFavorite = false,
   });
 
-  /// Allows updating specific fields (like syncStatus or isFavorite)
-  /// without manually recreating the whole object.
+  //Allows updating specific fields (like syncStatus or isFavorite)
+  // without manually recreating the whole object.
   Property copyWith({
     int? id,
     String? title,

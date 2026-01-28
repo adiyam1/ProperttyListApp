@@ -4,6 +4,7 @@ import '../models/property.dart';
 import '../providers/favorites_provider.dart';
 import '../screens/property_detail_screen.dart';
 import '../db/database_helper.dart';
+import 'property_image.dart';
 
 class PropertyCard extends ConsumerStatefulWidget {
   final Property property;
@@ -42,21 +43,22 @@ class _PropertyCardState extends ConsumerState<PropertyCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ================= IMAGE + BADGES =================
+            // IMAGE + BADGES 
             Stack(
               children: [
                 SizedBox(
                   height: 200,
                   width: double.infinity,
-                  child: Image.network(
-                    widget.property.imageUrls.isNotEmpty
+                  child: propertyImage(
+                    url: widget.property.imageUrls.isNotEmpty
                         ? widget.property.imageUrls.first
                         : 'https://via.placeholder.com/400',
                     fit: BoxFit.cover,
+                    height: 200,
                   ),
                 ),
 
-                // 🔄 SYNC BADGE
+                //  SYNC BADGE
                 Positioned(
                   top: 12,
                   left: 12,
@@ -68,7 +70,7 @@ class _PropertyCardState extends ConsumerState<PropertyCard> {
                   ),
                 ),
 
-                // ❤️ FAVORITE
+                //  FAVORITE
                 Positioned(
                   top: 12,
                   right: 12,
@@ -92,7 +94,7 @@ class _PropertyCardState extends ConsumerState<PropertyCard> {
               ],
             ),
 
-            // ================= DETAILS =================
+            // DETAILS
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -171,7 +173,7 @@ class _PropertyCardState extends ConsumerState<PropertyCard> {
     );
   }
 
-  // ================= SYNC HANDLER =================
+  // SYNC HANDLER 
 
   Future<void> _handleSyncTap() async {
     if (widget.property.syncStatus == 'synced') return;
@@ -205,7 +207,7 @@ class _PropertyCardState extends ConsumerState<PropertyCard> {
     }
   }
 
-  // ================= UI HELPERS =================
+  // UI HELPERS 
 
   Widget _buildSyncBadge(String? status) {
     Color color;

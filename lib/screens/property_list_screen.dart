@@ -4,7 +4,9 @@ import 'package:propert_list/widget/property_card.dart';
 
 import '../providers/property_provider.dart';
 import '../providers/app_init_provider.dart';
-import '../providers/connectivity_provider.dart'; // New import
+import '../providers/connectivity_provider.dart';
+import '../providers/user_provider.dart';
+import 'add_edit_property_screen.dart';
 import 'favorites_screen.dart';
 import 'offline_indicator.dart';
 import 'profile_screen.dart';
@@ -26,6 +28,11 @@ class PropertyListScreen extends ConsumerWidget {
       ),
       data: (_) {
         final propertyListAsync = ref.watch(propertyListProvider);
+        final user = ref.watch(userProvider).maybeWhen(
+              data: (d) => d,
+              orElse: () => null,
+            );
+        final isAdmin = user?.isAdmin ?? false;
 
         return Scaffold(
           appBar: AppBar(
@@ -34,6 +41,17 @@ class PropertyListScreen extends ConsumerWidget {
               IconButton(icon: const Icon(Icons.notifications_none), onPressed: () {}),
             ],
           ),
+          floatingActionButton: isAdmin
+              ? FloatingActionButton(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const AddEditPropertyScreen(),
+                    ),
+                  ),
+                  child: const Icon(Icons.add),
+                )
+              : null,
           body: Column(
             children: [
               // 1️⃣ Offline Banner (Matches offline indicator.jpg)

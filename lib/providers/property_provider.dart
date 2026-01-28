@@ -12,8 +12,8 @@ class PropertyNotifier extends StateNotifier<AsyncValue<List<Property>>> {
     loadProperties();
   }
 
-  /// Fetches properties from local SQLite.
-  /// Displays the 'Cached' or 'Synced' states seen in home.jpg
+  // Fetches properties from local SQLite.
+  // Displays the 'Cached' or 'Synced' states seen in home.jpg
   Future<void> loadProperties() async {
     state = const AsyncValue.loading();
     try {
@@ -24,7 +24,7 @@ class PropertyNotifier extends StateNotifier<AsyncValue<List<Property>>> {
     }
   }
 
-  /// Updates a property's status locally (e.g., when a background sync finishes)
+  // Updates a property's status locally (e.g., when a background sync finishes)
   void updatePropertyInState(Property updatedProperty) {
     state.whenData((properties) {
       state = AsyncValue.data([
@@ -35,14 +35,14 @@ class PropertyNotifier extends StateNotifier<AsyncValue<List<Property>>> {
   }
 }
 
-/// The main provider for the Property List UI
+// The main provider for the Property List UI
 final propertyListProvider =
 StateNotifierProvider<PropertyNotifier, AsyncValue<List<Property>>>((ref) {
   return PropertyNotifier(ref.watch(propertyRepositoryProvider));
 });
 
-/// A specific provider for the Favorites Screen (fav.jpg)
-/// Filters properties where isFavorite is true
+// A specific provider for the Favorites Screen (fav.jpg)
+// Filters properties where isFavorite is true
 final favoritePropertiesProvider = Provider<List<Property>>((ref) {
   final allProps = ref.watch(propertyListProvider);
   return allProps.maybeWhen(

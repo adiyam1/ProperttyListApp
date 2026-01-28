@@ -1,5 +1,6 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
+
 import '../models/property.dart';
 import '../models/inquiry.dart';
 import '../models/user.dart';
@@ -12,23 +13,22 @@ class DatabaseHelper {
 
   Future<Database> get database async {
     if (_database != null) return _database!;
-    _database = await _initDB('property_pal.db');
+    _database = await _initDB();
     return _database!;
   }
 
-  Future<Database> _initDB(String fileName) async {
-    final dbPath = await getDatabasesPath();
-    final path = join(dbPath, fileName);
-
+  Future<Database> _initDB() async {
+    final databasesPath = await getDatabasesPath();
+    final path = join(databasesPath, 'propert_list.db');
     return await openDatabase(
       path,
-      version: 5, // ✅ bumped to trigger status migration
+      version: 6,
       onCreate: _createDB,
       onUpgrade: _onUpgrade,
     );
   }
 
-  // ================= CREATE DATABASE =================
+  // CREATE DATABASE 
 
   Future<void> _createDB(Database db, int version) async {
     await db.execute('''
@@ -39,7 +39,7 @@ class DatabaseHelper {
         location TEXT,
         price REAL,
         imageUrls TEXT,
-        status TEXT,              -- ✅ FIX
+        status TEXT,
         beds INTEGER,
         baths REAL,
         sqft INTEGER,
@@ -65,6 +65,8 @@ class DatabaseHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT,
         email TEXT,
+        passwordHash TEXT,
+        role TEXT DEFAULT 'user',
         avatar TEXT,
         isDarkMode INTEGER DEFAULT 0,
         isOfflineModeOnly INTEGER DEFAULT 0,
@@ -74,7 +76,7 @@ class DatabaseHelper {
     ''');
   }
 
-  // ================= MIGRATIONS =================
+  // MIGRATIONS 
 
   Future<void> _onUpgrade(Database db, int oldVersion, int newVersion) async {
     // v3: add property dimensions
@@ -103,13 +105,24 @@ class DatabaseHelper {
       }
     }
 
-    // v5: add status to properties ✅ FIX FOR YOUR ERROR
+    // v5: add status to properties
     if (oldVersion < 5) {
       final tableInfo = await db.rawQuery('PRAGMA table_info(properties)');
       final columns = tableInfo.map((e) => e['name']).toList();
-
       if (!columns.contains('status')) {
         await db.execute('ALTER TABLE properties ADD COLUMN status TEXT');
+      }
+    }
+
+    // v6: users role + passwordHash
+    if (oldVersion < 6) {
+      final uInfo = await db.rawQuery('PRAGMA table_info(users)');
+      final uCols = uInfo.map((e) => e['name']).toList();
+      if (!uCols.contains('passwordHash')) {
+        await db.execute('ALTER TABLE users ADD COLUMN passwordHash TEXT');
+      }
+      if (!uCols.contains('role')) {
+        await db.execute('ALTER TABLE users ADD COLUMN role TEXT DEFAULT \'user\'');
       }
     }
   }
@@ -122,6 +135,36 @@ class DatabaseHelper {
     if (maps.isNotEmpty) {
       return UserModel.fromMap(maps.first);
     }
+    return null;
+  }
+
+  Future<int> getUsersCount() async {
+    final db = await database;
+    final r = await db.rawQuery('SELECT COUNT(*) as c FROM users');
+    return (r.first['c'] as int?) ?? 0;
+  }
+
+  Future<UserModel?> getUserByEmail(String email) async {
+    final db = await database;
+    final maps = await db.query(
+      'users',
+      where: 'email = ?',
+      whereArgs: [email.trim().toLowerCase()],
+      limit: 1,
+    );
+    if (maps.isNotEmpty) return UserModel.fromMap(maps.first);
+    return null;
+  }
+
+  Future<UserModel?> getUserById(int id) async {
+    final db = await database;
+    final maps = await db.query(
+      'users',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
+    if (maps.isNotEmpty) return UserModel.fromMap(maps.first);
     return null;
   }
 
@@ -144,7 +187,7 @@ class DatabaseHelper {
     );
   }
 
-  // ================= PROPERTY OPERATIONS =================
+  //  PROPERTY OPERATIONS 
 
   Future<List<Property>> getAllProperties() async {
     final db = await database;
@@ -161,10 +204,27 @@ class DatabaseHelper {
     );
   }
 
+  Future<void> deleteProperty(int id) async {
+    final db = await database;
+    await db.delete('properties', where: 'id = ?', whereArgs: [id]);
+  }
+
+  Future<void> updateProperty(Property property) async {
+    if (property.id == null) return;
+    final db = await database;
+    final m = property.toMap()..remove('id');
+    await db.update(
+      'properties',
+      m,
+      where: 'id = ?',
+      whereArgs: [property.id],
+    );
+  }
+
   Future<List<Property>> getFavorites() async {
     final db = await database;
     final maps =
-    await db.query('properties', where: 'isFavorite = ?', whereArgs: [1]);
+        await db.query('properties', where: 'isFavorite = ?', whereArgs: [1]);
     return maps.map((e) => Property.fromMap(e)).toList();
   }
 
@@ -178,7 +238,7 @@ class DatabaseHelper {
     );
   }
 
-  // ================= INQUIRY & SYNC =================
+  //  INQUIRY & SYNC 
 
   Future<void> updatePropertySyncStatus(int id, String status) async {
     final db = await database;
@@ -208,6 +268,17 @@ class DatabaseHelper {
     return maps.map((e) => Inquiry.fromMap(e)).toList();
   }
 
+  Future<List<Inquiry>> getInquiriesByUserId(int userId) async {
+    final db = await database;
+    final maps = await db.query(
+      'inquiries',
+      where: 'userId = ?',
+      whereArgs: [userId],
+      orderBy: 'timestamp DESC',
+    );
+    return maps.map((e) => Inquiry.fromMap(e)).toList();
+  }
+
   Future<void> updateInquiryStatus(int id, String status) async {
     final db = await database;
     await db.update(
@@ -218,7 +289,7 @@ class DatabaseHelper {
     );
   }
 
-  // ================= CLEANUP =================
+  // CLEANUP 
 
   Future<void> clearOfflineCache() async {
     final db = await database;

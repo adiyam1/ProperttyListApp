@@ -1,8 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:propert_list/providers/user_provider.dart';
+import 'package:propert_list/providers/auth_provider.dart';
 
 import '../db/database_helper.dart';
+
 final themeProvider = StateNotifierProvider<ThemeNotifier, bool>((ref) {
   return ThemeNotifier(ref);
 });
@@ -16,9 +17,11 @@ class ThemeNotifier extends StateNotifier<bool> {
   }
 
   Future<void> _initTheme() async {
-    final user = await _db.getUser();
-    if (user != null) {
-      state = user.isDarkMode;
+    final auth = _ref.read(authServiceProvider);
+    final id = await auth.getCurrentUserId();
+    if (id != null) {
+      final user = await _db.getUserById(id);
+      if (user != null) state = user.isDarkMode;
     }
   }
 
@@ -35,7 +38,7 @@ class ThemeNotifier extends StateNotifier<bool> {
         // Persist theme choice
         await _db.updateUserTheme(user.id!, state);
 
-        // ✅ This will now work perfectly!
+        //  This will now work perfectly!
         await _ref.read(userProvider.notifier).updateUser(
           user.copyWith(isDarkMode: state),
         );

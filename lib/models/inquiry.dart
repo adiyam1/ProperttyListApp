@@ -15,8 +15,8 @@ class Inquiry {
     required this.timestamp,
   });
 
-  /// Helper to create a new instance with updated fields.
-  /// Useful when the network sync finishes and you need to update status to 'synced'.
+  //Helper to create a new instance with updated fields.
+  //Useful when the network sync finishes and you need to update status to 'synced'.
   Inquiry copyWith({
     int? id,
     int? propertyId,
