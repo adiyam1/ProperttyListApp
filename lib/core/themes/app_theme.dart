@@ -8,6 +8,6 @@ class AppTheme {
 
   static final darkTheme = ThemeData(
     brightness: Brightness.dark,
-    primarySwatch: Colors.blueGrey,
+    primarySwatch: Colors.grey,
   );
 }

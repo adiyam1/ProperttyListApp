@@ -15,6 +15,26 @@ class Inquiry {
     required this.timestamp,
   });
 
+  /// Helper to create a new instance with updated fields.
+  /// Useful when the network sync finishes and you need to update status to 'synced'.
+  Inquiry copyWith({
+    int? id,
+    int? propertyId,
+    int? userId,
+    String? message,
+    String? status,
+    DateTime? timestamp,
+  }) {
+    return Inquiry(
+      id: id ?? this.id,
+      propertyId: propertyId ?? this.propertyId,
+      userId: userId ?? this.userId,
+      message: message ?? this.message,
+      status: status ?? this.status,
+      timestamp: timestamp ?? this.timestamp,
+    );
+  }
+
   Map<String, dynamic> toMap() => {
     'id': id,
     'propertyId': propertyId,
@@ -25,11 +45,11 @@ class Inquiry {
   };
 
   factory Inquiry.fromMap(Map<String, dynamic> map) => Inquiry(
-    id: map['id'],
-    propertyId: map['propertyId'],
-    userId: map['userId'],
-    message: map['message'],
-    status: map['status'],
-    timestamp: DateTime.parse(map['timestamp']),
+    id: map['id'] as int?,
+    propertyId: map['propertyId'] as int,
+    userId: map['userId'] as int,
+    message: map['message'] as String,
+    status: map['status'] as String,
+    timestamp: DateTime.parse(map['timestamp'] as String),
   );
 }

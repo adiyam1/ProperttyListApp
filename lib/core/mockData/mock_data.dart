@@ -2,88 +2,111 @@ import '../../db/database_helper.dart';
 import '../../models/inquiry.dart';
 import '../../models/property.dart';
 import '../../models/user.dart';
-import '../../repository/inquiry_repository.dart';
-import '../../repository/property_repository.dart';
 
 class MockData {
   static Future<void> seedPropertiesAndInquiries() async {
-    final propertyRepo = PropertyRepository();
-    final inquiryRepo = InquiryRepository();
+    final db = DatabaseHelper.instance;
 
-    // ---------- MOCK USER ----------
+    // 1️⃣ SEED USER (Jane Doe)
     final user = await _seedUser();
 
-    // ---------- MOCK PROPERTIES ----------
+    // 2️⃣ SEED PROPERTIES
+    final dbInstance = await db.database;
+    await dbInstance.delete('properties');
+
     final properties = [
       Property(
-        id: null,
-        title: 'Modern Apartment',
-        description: '2 bedroom apartment with balcony and parking',
-        location: 'Addis Ababa, Ethiopia',
-        price: 120000,
-        imageUrls: [
-         'https://media.inmobalia.com/imgV1/B95mbh8olwFQm~uCUaVOI2kQT0hb0a8sZ9turUNfnwtvuccYCzs0YVPfPbfkc2VnnN1JFDplhuC3TbFKfXVuwuplORa3JhgMpth4H49R6vsah7SzBjVKlw9XCoFK_kEqT4~iT~9klDs3U9FB8Unxn4VObZDr53vZLPsi~uMq3VqZKZ1KBCjlMtToP5NDfDryyAd_2KMy~Us2~u_mU8U76nsFStMXUhGCou3vMU~HUPTvZBUUeG3oAm8CpFk1ZJBvQ5AMaEJ~20oYcqO~rvCpsM5AzfY4FJ3U~oczAUpxP9RzVK_lTynhsvfBaT4~3mpLBuFvJLGj_qt6kznEiSTIkXquTq~W3h1pS3N4cm~9QdRfVaf8mEfGmW9NTpVNGrVwGMvYKOl0m2C_U7FG2lcsP2Z8mw--.jpg',
-        ],
+        title: 'Luxury Beachfront Villa',
+        description: 'Stunning villa with direct beach access and a private pool.',
+        location: 'Miami, FL',
+        price: 1800000,
+        beds: 5,
+        baths: 4.5,
+        sqft: 4200,
+        imageUrls: ['https://images.unsplash.com/photo-1613490493576-7fde63acd811'],
+        isFavorite: true,
+        // ✅ Added missing required parameters
         status: 'published',
         syncStatus: 'synced',
         lastUpdated: DateTime.now(),
+
       ),
       Property(
-        id: null,
-        title: 'Cozy Studio',
-        description: 'Studio apartment in city center, ideal for singles',
-        location: 'Bole, Addis Ababa',
-        price: 80000,
-        imageUrls: [
-          'https://media.inmobalia.com/imgV1/B95mbh8olwFQm~uCUaVOI2kQT0hb0a8sZ9turUNfnwtvuccYCzs0YVPfPbfkc2VnnN1JFDpiUtpDtNzRBb3njP34INKjN3sD1X_xE86_z1WaEh0LP~mU5SIKjuUUTuKYGmVU~mNY7eXEWVuwoF5pbMsvvmgRlkP74w32eXgL9Whln3bFUWzomZ3R86MKnP9gTcIQkcrQw7f6Kd45r7tx_DmyfhduMzAmgVxE7~xQUcDfpDb9cZp7Jpr08FYDUOwi6dH2_S4GwmmyTrMWmsTGIyKGrmN_KYYevwO73Frbb3aNThqKlYh7AcOJhnYHP2o5L8kGCyAFLCPREYoQXWwM0nV7FNNIwpEbWDnEphIBkRuwtf1MtjZ4KtPqJb_iQpVScE2KmoA-.jpg',
-        ],
+        title: 'Cozy Lakeside Cottage',
+        description: 'A peaceful retreat by the lake, perfect for weekends.',
+        location: 'Lake Tahoe, CA',
+        price: 450000,
+        beds: 3,
+        baths: 2.0,
+        sqft: 1500,
+        imageUrls: ['https://images.unsplash.com/photo-1500382017468-9049fed747ef'],
+        isFavorite: true,
+        // ✅ Added missing required parameters
         status: 'published',
-        syncStatus: 'synced',
+        syncStatus: 'failed',
         lastUpdated: DateTime.now(),
+
+      ),
+      Property(
+        title: 'Modern Family Home',
+        description: 'Spacious suburban home with a two-car garage.',
+        location: 'Cityville, TX',
+        price: 520000,
+        beds: 4,
+        baths: 3.0,
+        sqft: 2800,
+        imageUrls: ['https://images.unsplash.com/photo-1568605114967-8130f3a36994'],
+        isFavorite: false,
+        // ✅ Added missing required parameters
+        status: 'published',
+        syncStatus: 'cached',
+        lastUpdated: DateTime.now(),
+
       ),
     ];
 
-    final insertedProperties = <Property>[];
-    for (var property in properties) {
-      await propertyRepo.saveProperty(property);
-      final allProps = await propertyRepo.fetchProperties();
-      insertedProperties.add(allProps.last);
+    for (var p in properties) {
+      await db.insertProperty(p);
     }
 
-    print('✅ Mock properties inserted');
+    // 3️⃣ SEED INQUIRIES
+    final allProps = await db.getAllProperties();
+    await dbInstance.delete('inquiries');
 
-    // ---------- MOCK INQUIRIES ----------
     final inquiries = [
       Inquiry(
-        propertyId: insertedProperties[0].id!,
+        propertyId: allProps[0].id!,
         userId: user.id!,
-        message: 'Is this apartment still available?',
-        status: 'queued',
+        message: 'I\'m interested in this villa!',
+        status: 'synced',
         timestamp: DateTime.now(),
       ),
       Inquiry(
-        propertyId: insertedProperties[1].id!,
+        propertyId: allProps[1].id!,
         userId: user.id!,
-        message: 'Can I schedule a visit next week?',
+        message: 'Is the cottage available in December?',
         status: 'queued',
         timestamp: DateTime.now(),
       ),
     ];
 
-    for (var inquiry in inquiries) {
-      await inquiryRepo.saveInquiry(inquiry);
+    for (var i in inquiries) {
+      await db.insertInquiry(i);
     }
 
-    print('✅ Mock inquiries inserted');
+    print('🚀 Database seeded with Mock Data successfully');
   }
 
-  // ---- helper ----
   static Future<UserModel> _seedUser() async {
     final user = UserModel(
       name: 'Jane Doe',
       email: 'jane.doe@example.com',
+      avatar: 'https://i.pravatar.cc/150?u=jane',
       isDarkMode: false,
+      isOfflineModeOnly: true,
       createdAt: DateTime.now(),
+      // Ensure UserModel doesn't have missing required fields too!
+      lastGlobalSync: DateTime.now(),
     );
 
     await DatabaseHelper.instance.saveUser(user);
