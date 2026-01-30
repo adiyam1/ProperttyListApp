@@ -157,7 +157,7 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
                         ),
                       ),
                       Text(
-                        '\$${property.price.toStringAsFixed(0)}',
+                        '${property.price.toStringAsFixed(0)}ETB',
                         style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.blue),
                       ),
                     ],
@@ -197,7 +197,7 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: const [
-                          Text('Jane Doe', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                          Text('Adiyam Yet', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                           Text('Property Owner', style: TextStyle(color: Colors.grey)),
                         ],
                       ),

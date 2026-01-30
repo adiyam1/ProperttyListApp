@@ -117,7 +117,7 @@ class _PropertyCardState extends ConsumerState<PropertyCard> {
                         ),
                       ),
                       Text(
-                        '\$${widget.property.price.toStringAsFixed(0)}',
+                        '${widget.property.price.toStringAsFixed(0)}ETB',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
