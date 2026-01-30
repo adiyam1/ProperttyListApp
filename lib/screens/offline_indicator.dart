@@ -17,7 +17,7 @@ class OfflineIndicator extends StatelessWidget {
         color: Colors.orange.shade800, // Matches the warm "warning" tone in the UI
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -46,7 +46,7 @@ class OfflineIndicator extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
+              color: Colors.white.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(4),
             ),
             child: const Text(
