@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 
 class OfflineIndicator extends StatelessWidget {
-  final bool isOnline;
+ final bool show; // true = show banner
 
-  const OfflineIndicator({super.key, required this.isOnline});
+  const OfflineIndicator({super.key, required this.show});
 
   @override
   Widget build(BuildContext context) {
-    // If online, we don't show the banner at all
-    if (isOnline) return const SizedBox.shrink();
-
+    if (!show) return const SizedBox.shrink();
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),

@@ -30,7 +30,7 @@ class _OfflineContent extends ConsumerWidget {
         color: Colors.orange.shade800,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.12),
+            color: Colors.black.withValues(alpha: 0.12),
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -61,7 +61,7 @@ class _OfflineContent extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.25),
+              color: Colors.white.withValues(alpha: 0.25),
               borderRadius: BorderRadius.circular(4),
             ),
             child: const Text(

@@ -23,7 +23,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   late TextEditingController _nameCtrl;
   late TextEditingController _emailCtrl;
   late TextEditingController _avatarCtrl;
-  XFile? _pickedAvatar;
+  //XFile? _pickedAvatar;
 
   @override
   void initState() {
@@ -38,7 +38,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     _nameCtrl.dispose();
     _emailCtrl.dispose();
     _avatarCtrl.dispose();
-    _pickedAvatar = null;
+ //   _pickedAvatar = null;
     super.dispose();
   }
 
@@ -50,7 +50,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     );
     if (picked == null) return;
     setState(() {
-      _pickedAvatar = picked;
+     // _pickedAvatar = picked;
       _avatarCtrl.text = picked.path;
     });
   }
@@ -202,7 +202,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                               TextButton(
                                 onPressed: () {
                                   _avatarCtrl.clear();
-                                  setState(() => _pickedAvatar = null);
+                                  //setState(() => _pickedAvatar = null);
                                 },
                                 child: const Text('Clear'),
                               ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:propert_list/widget/offline_banner.dart';
 import 'package:propert_list/widget/property_card.dart';
 
 import '../providers/property_provider.dart';
@@ -54,8 +55,14 @@ class PropertyListScreen extends ConsumerWidget {
               : null,
           body: Column(
             children: [
-              // 1️⃣ Offline Banner (Matches offline indicator.jpg)
-              OfflineIndicator(isOnline: isOnline),
+              // 1️ Offline Banner (Matches offline indicator.jpg)
+              OfflineIndicator(
+             show: !isOnline || (user?.isOfflineModeOnly ?? false),
+            ),
+
+
+             // OfflineIndicator(isOnline: isOnline),
+             // OfflineBanner(),
 
               Expanded(
                 child: propertyListAsync.when(
@@ -68,7 +75,7 @@ class PropertyListScreen extends ConsumerWidget {
                       padding: const EdgeInsets.all(16),
                       itemCount: properties.length + 1,
                       itemBuilder: (context, index) {
-                        // 2️⃣ Header section from home.jpg
+                        // 2 Header section from home.jpg
                         if (index == 0) {
                           return const Padding(
                             padding: EdgeInsets.only(bottom: 16),

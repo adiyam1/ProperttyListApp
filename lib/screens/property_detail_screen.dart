@@ -191,7 +191,7 @@ class _PropertyDetailScreenState extends ConsumerState<PropertyDetailScreen> {
                     children: [
                       const CircleAvatar(
                         radius: 25,
-                        backgroundImage: NetworkImage('https://example.com/agent.jpg'),
+                        backgroundImage: AssetImage(  'assets/images/yod.png'),
                       ),
                       const SizedBox(width: 12),
                       Column(
